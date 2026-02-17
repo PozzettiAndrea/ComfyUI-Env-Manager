@@ -101,6 +101,9 @@ async def get_environments(request):
     node_envs = []
 
     for module_name, module_dir in comfy_nodes.LOADED_MODULE_DIRS.items():
+        # Only show nodes from custom_nodes/, not built-in comfy_extras/comfy_api_nodes
+        if "/custom_nodes/" not in module_dir and "\\custom_nodes\\" not in module_dir:
+            continue
         node_dir = Path(module_dir)
         entry = {
             "node_name": module_name,

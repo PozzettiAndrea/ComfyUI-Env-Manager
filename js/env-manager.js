@@ -535,7 +535,7 @@ app.registerExtension({
                 action: () => EnvManagerDialog.getInstance().show(),
                 tooltip: "Environment Manager",
                 content: "Env",
-                classList: "comfyui-button comfyui-menu-mobile-collapse",
+                classList: "comfyui-button comfyui-menu-mobile-collapse primary",
             });
 
             const group = new ComfyButtonGroup(envButton.element);
