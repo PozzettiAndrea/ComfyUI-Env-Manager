@@ -1,0 +1,11 @@
+[project]
+name = "comfyui-env-manager"
+version = "0.1.0"
+description = "Environment visibility panel for comfy-env in ComfyUI"
+requires-python = ">=3.10"
+dependencies = ["comfy-env"]
+
+[tool.comfy]
+PublisherId = "comfy-env"
+DisplayName = "ComfyUI Env Manager"
+Icon = "chip"
