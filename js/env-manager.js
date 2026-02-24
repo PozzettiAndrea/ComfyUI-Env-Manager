@@ -281,6 +281,20 @@ const CSS = `
 }
 .em-config-btn:hover { background: #3a3a5a; color: #aad4ff; }
 
+/* Install log button */
+.em-log-btn {
+    background: #2a2a3a;
+    border: 1px solid #665522;
+    color: #c4a84f;
+    border-radius: 4px;
+    padding: 2px 8px;
+    cursor: pointer;
+    font-size: 10px;
+    font-family: "SF Mono", "Fira Code", monospace;
+    white-space: nowrap;
+}
+.em-log-btn:hover { background: #3a3a2a; color: #e0c860; }
+
 /* Worker entries */
 .em-worker-entry {
     display: flex;
@@ -940,6 +954,12 @@ class EnvManagerDialog {
                     onclick: (e) => { e.stopPropagation(); this._showCachedConfig(env.name, env.cached_config_content); },
                 }, ["config"]));
             }
+            if (env.has_install_log) {
+                rightParts.push($el("button.em-log-btn", {
+                    onclick: (e) => { e.stopPropagation(); this._showInstallLog(env.path, env.name); },
+                    title: "View install log",
+                }, ["install log"]));
+            }
             rightParts.push($el("button.em-terminal-btn", {
                 onclick: (e) => { e.stopPropagation(); this._openTerminal(env.path, env.name); },
                 title: "Open terminal in this environment",
@@ -1297,6 +1317,35 @@ class EnvManagerDialog {
                 $el("span.em-wheel-name", {}, [pkg.name]),
                 $el("div.em-wheel-right", rightParts),
             ]));
+        }
+    }
+
+    async _showInstallLog(envPath, envName) {
+        try {
+            const res = await api.fetchApi(`/env-manager/install-log?path=${encodeURIComponent(envPath)}`);
+            const data = await res.json();
+            if (!res.ok) {
+                alert(data.error || "No install log found");
+                return;
+            }
+            const overlay = $el("div.em-config-overlay", {
+                onclick: (e) => { if (e.target === overlay) overlay.remove(); },
+            }, [
+                $el("div.em-config-popup", [
+                    $el("div.em-config-header", [
+                        $el("span.em-config-title", {}, [`${envName} - install.log`]),
+                        $el("button.em-config-close", {
+                            onclick: () => overlay.remove(),
+                        }, ["\u2715"]),
+                    ]),
+                    $el("div.em-config-body", [
+                        $el("pre.em-config-code", {}, [data.content]),
+                    ]),
+                ]),
+            ]);
+            document.body.appendChild(overlay);
+        } catch (err) {
+            alert(`Error loading install log: ${err.message}`);
         }
     }
 

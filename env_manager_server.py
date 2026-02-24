@@ -220,6 +220,7 @@ async def get_environments(request):
                         except Exception:
                             pass
                     cache_envs.append(entry)
+                    entry["has_install_log"] = (item / "install.log").exists()
         except OSError:
             pass
 
@@ -254,6 +255,38 @@ async def get_config(request):
         return web.json_response({"error": str(exc)}, status=500)
 
     return web.json_response({"path": str(p), "content": content})
+
+
+# ---------------------------------------------------------------------------
+# Route 3b: Read install log for a cached environment
+# ---------------------------------------------------------------------------
+
+@routes.get("/env-manager/install-log")
+async def get_install_log(request):
+    """Read install.log from a cached environment directory."""
+    env_path = request.rel_url.query.get("path", "")
+    if not env_path:
+        return web.json_response({"error": "missing 'path' parameter"}, status=400)
+
+    p = Path(env_path).resolve()
+    cache_dir = _get_cache_dir().resolve()
+
+    # Safety: only allow paths inside the cache directory
+    try:
+        p.relative_to(cache_dir)
+    except ValueError:
+        return web.json_response({"error": "path must be inside cache directory"}, status=403)
+
+    log_file = p / "install.log"
+    if not log_file.exists():
+        return web.json_response({"error": "no install.log found"}, status=404)
+
+    try:
+        content = log_file.read_text(encoding="utf-8", errors="replace")
+    except Exception as exc:
+        return web.json_response({"error": str(exc)}, status=500)
+
+    return web.json_response({"path": str(log_file), "content": content})
 
 
 # ---------------------------------------------------------------------------
