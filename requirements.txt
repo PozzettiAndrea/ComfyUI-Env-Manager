@@ -1,1 +1,1 @@
-comfy-env==0.2.69
+comfy-env==0.2.77
